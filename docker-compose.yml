@@ -1,0 +1,47 @@
+version: '3'
+services:
+ nginx:
+   restart: always
+   build : 
+    dockerfile: Dockerfile.dev
+    context: ./nginx
+   ports:
+     - '3050:80'
+ postgres:
+   image : 'postgres:latest'
+ redis:
+   image: 'redis:latest'
+ worker:
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes:  
+      - /app/node_modules 
+      - ./worker:/app
+ api:
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./server
+    volumes:  #if every thing in server changes we dont need any build again
+      - /app/node_modules #leave this file inside the container alone and doesnt make any change
+      - ./server:/app #map all file in build folder in server to app in container
+    environment :
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+ client:
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:  
+      - /app/node_modules 
+      - ./client:/app
+ 
+    
+
+      
+    
